@@ -1,11 +1,6 @@
 "use client";
 
 import { NdaFormValues } from "@/lib/nda-types";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
 
 interface Props {
   values: NdaFormValues;
@@ -18,172 +13,214 @@ export function NdaForm({ values, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-6 text-sm">
-      {/* Purpose */}
-      <div className="space-y-2">
-        <Label htmlFor="purpose" className="font-semibold">Purpose</Label>
-        <p className="text-muted-foreground text-xs">How Confidential Information may be used</p>
-        <Textarea
-          id="purpose"
+    <div style={{ display: "flex", flexDirection: "column", gap: "2.25rem" }}>
+
+      {/* ── Purpose ── */}
+      <Section label="Purpose" hint="How Confidential Information may be used" delay={1}>
+        <textarea
+          className="field-textarea"
           rows={3}
           value={values.purpose}
           onChange={(e) => set("purpose", e.target.value)}
-          placeholder="Evaluating whether to enter into a business relationship..."
+          placeholder="Evaluating whether to enter into a business relationship…"
         />
-      </div>
+      </Section>
 
-      <Separator />
-
-      {/* Effective Date */}
-      <div className="space-y-2">
-        <Label htmlFor="effectiveDate" className="font-semibold">Effective Date</Label>
-        <Input
-          id="effectiveDate"
+      {/* ── Effective Date ── */}
+      <Section label="Effective Date" delay={2}>
+        <input
+          className="field-input"
           type="date"
           value={values.effectiveDate}
           onChange={(e) => set("effectiveDate", e.target.value)}
         />
-      </div>
+      </Section>
 
-      <Separator />
-
-      {/* MNDA Term */}
-      <div className="space-y-3">
-        <Label className="font-semibold">MNDA Term</Label>
-        <p className="text-muted-foreground text-xs">The length of this MNDA</p>
-        <RadioGroup
-          value={values.mndaTermType}
-          onValueChange={(v) => set("mndaTermType", v as "fixed" | "perpetual")}
-          className="space-y-2"
-        >
-          <div className="flex items-center gap-3">
-            <RadioGroupItem value="fixed" id="mndaFixed" />
-            <Label htmlFor="mndaFixed" className="flex items-center gap-2 font-normal cursor-pointer">
+      {/* ── MNDA Term ── */}
+      <Section label="MNDA Term" hint="The length of this MNDA" delay={3}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label className="radio-pill">
+            <input
+              type="radio"
+              checked={values.mndaTermType === "fixed"}
+              onChange={() => set("mndaTermType", "fixed")}
+            />
+            <span style={{ fontFamily: "var(--font-ui)", fontSize: "0.8rem", color: "var(--foreground)", display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
               Expires after
-              <Input
+              <input
+                className="field-input"
                 type="number"
                 min={1}
                 value={values.mndaTermYears}
                 onChange={(e) => set("mndaTermYears", e.target.value)}
-                className="w-16 h-7 text-center"
                 disabled={values.mndaTermType !== "fixed"}
+                style={{ width: 40, textAlign: "center", display: "inline-block", padding: "0 0.25rem" }}
               />
-              year(s) from Effective Date
-            </Label>
-          </div>
-          <div className="flex items-center gap-3">
-            <RadioGroupItem value="perpetual" id="mndaPerpetual" />
-            <Label htmlFor="mndaPerpetual" className="font-normal cursor-pointer">
-              Continues until terminated
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
+              year(s)
+            </span>
+          </label>
+          <label className="radio-pill">
+            <input
+              type="radio"
+              checked={values.mndaTermType === "perpetual"}
+              onChange={() => set("mndaTermType", "perpetual")}
+            />
+            <span style={{ fontFamily: "var(--font-ui)", fontSize: "0.8rem", color: "var(--foreground)" }}>
+              Until terminated
+            </span>
+          </label>
+        </div>
+      </Section>
 
-      <Separator />
-
-      {/* Term of Confidentiality */}
-      <div className="space-y-3">
-        <Label className="font-semibold">Term of Confidentiality</Label>
-        <p className="text-muted-foreground text-xs">How long Confidential Information is protected</p>
-        <RadioGroup
-          value={values.confidentialityTermType}
-          onValueChange={(v) => set("confidentialityTermType", v as "fixed" | "perpetual")}
-          className="space-y-2"
-        >
-          <div className="flex items-center gap-3">
-            <RadioGroupItem value="fixed" id="confFixed" />
-            <Label htmlFor="confFixed" className="flex items-center gap-2 font-normal cursor-pointer">
-              <Input
+      {/* ── Term of Confidentiality ── */}
+      <Section label="Confidentiality Term" hint="How long information is protected" delay={4}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label className="radio-pill">
+            <input
+              type="radio"
+              checked={values.confidentialityTermType === "fixed"}
+              onChange={() => set("confidentialityTermType", "fixed")}
+            />
+            <span style={{ fontFamily: "var(--font-ui)", fontSize: "0.8rem", color: "var(--foreground)", display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+              <input
+                className="field-input"
                 type="number"
                 min={1}
                 value={values.confidentialityTermYears}
                 onChange={(e) => set("confidentialityTermYears", e.target.value)}
-                className="w-16 h-7 text-center"
                 disabled={values.confidentialityTermType !== "fixed"}
+                style={{ width: 40, textAlign: "center", display: "inline-block", padding: "0 0.25rem" }}
               />
               year(s) from Effective Date
-            </Label>
-          </div>
-          <div className="flex items-center gap-3">
-            <RadioGroupItem value="perpetual" id="confPerpetual" />
-            <Label htmlFor="confPerpetual" className="font-normal cursor-pointer">
+            </span>
+          </label>
+          <label className="radio-pill">
+            <input
+              type="radio"
+              checked={values.confidentialityTermType === "perpetual"}
+              onChange={() => set("confidentialityTermType", "perpetual")}
+            />
+            <span style={{ fontFamily: "var(--font-ui)", fontSize: "0.8rem", color: "var(--foreground)" }}>
               In perpetuity
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
+            </span>
+          </label>
+        </div>
+      </Section>
 
-      <Separator />
-
-      {/* Governing Law & Jurisdiction */}
-      <div className="space-y-4">
-        <Label className="font-semibold">Governing Law &amp; Jurisdiction</Label>
-        <div className="space-y-2">
-          <Label htmlFor="governingLaw" className="text-xs text-muted-foreground">Governing Law (state)</Label>
-          <Input
-            id="governingLaw"
+      {/* ── Governing Law & Jurisdiction ── */}
+      <Section label="Governing Law" delay={5}>
+        <FieldRow label="State">
+          <input
+            className="field-input"
             value={values.governingLaw}
             onChange={(e) => set("governingLaw", e.target.value)}
             placeholder="e.g. Delaware"
           />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="jurisdiction" className="text-xs text-muted-foreground">Jurisdiction (city/county and state)</Label>
-          <Input
-            id="jurisdiction"
+        </FieldRow>
+        <FieldRow label="Jurisdiction">
+          <input
+            className="field-input"
             value={values.jurisdiction}
             onChange={(e) => set("jurisdiction", e.target.value)}
             placeholder="e.g. New Castle, DE"
           />
-        </div>
-      </div>
+        </FieldRow>
+      </Section>
 
-      <Separator />
-
-      {/* Party 1 */}
-      <div className="space-y-3">
-        <Label className="font-semibold">Party 1</Label>
-        {[
-          { key: "party1Name" as const, label: "Print Name", placeholder: "Jane Smith" },
-          { key: "party1Title" as const, label: "Title", placeholder: "CEO" },
-          { key: "party1Company" as const, label: "Company", placeholder: "Acme Inc." },
-          { key: "party1Address" as const, label: "Notice Address", placeholder: "jane@acme.com" },
-        ].map(({ key, label, placeholder }) => (
-          <div key={key} className="space-y-1">
-            <Label htmlFor={key} className="text-xs text-muted-foreground">{label}</Label>
-            <Input
-              id={key}
+      {/* ── Party 1 ── */}
+      <Section label="Party 1" delay={6}>
+        {(
+          [
+            ["party1Name", "Print Name", "Jane Smith"],
+            ["party1Title", "Title", "CEO"],
+            ["party1Company", "Company", "Acme Inc."],
+            ["party1Address", "Notice Address", "jane@acme.com"],
+          ] as const
+        ).map(([key, label, placeholder]) => (
+          <FieldRow key={key} label={label}>
+            <input
+              className="field-input"
               value={values[key]}
               onChange={(e) => set(key, e.target.value)}
               placeholder={placeholder}
             />
-          </div>
+          </FieldRow>
         ))}
-      </div>
+      </Section>
 
-      <Separator />
-
-      {/* Party 2 */}
-      <div className="space-y-3">
-        <Label className="font-semibold">Party 2</Label>
-        {[
-          { key: "party2Name" as const, label: "Print Name", placeholder: "John Doe" },
-          { key: "party2Title" as const, label: "Title", placeholder: "CTO" },
-          { key: "party2Company" as const, label: "Company", placeholder: "Beta Corp." },
-          { key: "party2Address" as const, label: "Notice Address", placeholder: "john@betacorp.com" },
-        ].map(({ key, label, placeholder }) => (
-          <div key={key} className="space-y-1">
-            <Label htmlFor={key} className="text-xs text-muted-foreground">{label}</Label>
-            <Input
-              id={key}
+      {/* ── Party 2 ── */}
+      <Section label="Party 2" delay={7}>
+        {(
+          [
+            ["party2Name", "Print Name", "John Doe"],
+            ["party2Title", "Title", "CTO"],
+            ["party2Company", "Company", "Beta Corp."],
+            ["party2Address", "Notice Address", "john@betacorp.com"],
+          ] as const
+        ).map(([key, label, placeholder]) => (
+          <FieldRow key={key} label={label}>
+            <input
+              className="field-input"
               value={values[key]}
               onChange={(e) => set(key, e.target.value)}
               placeholder={placeholder}
             />
-          </div>
+          </FieldRow>
         ))}
+      </Section>
+
+    </div>
+  );
+}
+
+function Section({
+  label,
+  hint,
+  delay,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  delay: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`fade-up fade-up-${delay}`} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+      <div>
+        <p className="form-section-label">{label}</p>
+        {hint && (
+          <p
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontSize: "0.7rem",
+              color: "var(--foreground-muted)",
+              marginTop: "0.25rem",
+            }}
+          >
+            {hint}
+          </p>
+        )}
       </div>
+      {children}
+    </div>
+  );
+}
+
+function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+      <p
+        style={{
+          fontFamily: "var(--font-ui)",
+          fontSize: "0.65rem",
+          color: "var(--foreground-muted)",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </p>
+      {children}
     </div>
   );
 }
