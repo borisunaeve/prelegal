@@ -1,5 +1,3 @@
-"use client";
-
 import { NdaFormValues } from "@/lib/nda-types";
 
 interface Props {
@@ -24,14 +22,29 @@ function formatDate(iso: string) {
   );
 }
 
+function safeYears(val: string): number {
+  return Math.max(1, parseInt(val, 10) || 1);
+}
+
 function mndaTermText(v: NdaFormValues) {
   if (v.mndaTermType === "perpetual") return "Continues until terminated in accordance with the terms of the MNDA.";
-  return `Expires ${v.mndaTermYears || "1"} year(s) from Effective Date.`;
+  return `Expires ${safeYears(v.mndaTermYears)} year(s) from Effective Date.`;
 }
 
 function confTermText(v: NdaFormValues) {
   if (v.confidentialityTermType === "perpetual") return "In perpetuity.";
-  return `${v.confidentialityTermYears || "1"} year(s) from Effective Date, but in the case of trade secrets until Confidential Information is no longer considered a trade secret under applicable laws.`;
+  return `${safeYears(v.confidentialityTermYears)} year(s) from Effective Date, but in the case of trade secrets until Confidential Information is no longer considered a trade secret under applicable laws.`;
+}
+
+// Inline variants for use mid-sentence in Standard Terms clauses
+function mndaTermInline(v: NdaFormValues) {
+  if (v.mndaTermType === "perpetual") return "the date of termination";
+  return `${safeYears(v.mndaTermYears)} year(s) from the Effective Date`;
+}
+
+function confTermInline(v: NdaFormValues) {
+  if (v.confidentialityTermType === "perpetual") return "in perpetuity";
+  return `${safeYears(v.confidentialityTermYears)} year(s) from the Effective Date`;
 }
 
 // Inline reference highlight used in Standard Terms
@@ -152,36 +165,18 @@ export function NdaPreview({ values: v }: Props) {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem", border: "1px solid #d0cec8" }}>
           <thead>
             <tr style={{ background: "#f4f0e8" }}>
-              <th style={{ border: "1px solid #d0cec8", padding: "0.6rem 0.75rem", textAlign: "left", fontWeight: 600, width: "28%", fontFamily: "var(--font-ui)", fontSize: "0.7rem", letterSpacing: "0.05em", textTransform: "uppercase" }}></th>
-              <th style={{ border: "1px solid #d0cec8", padding: "0.6rem 0.75rem", textAlign: "center", fontWeight: 600, fontFamily: "var(--font-ui)", fontSize: "0.7rem", letterSpacing: "0.05em", textTransform: "uppercase" }}>Party 1</th>
-              <th style={{ border: "1px solid #d0cec8", padding: "0.6rem 0.75rem", textAlign: "center", fontWeight: 600, fontFamily: "var(--font-ui)", fontSize: "0.7rem", letterSpacing: "0.05em", textTransform: "uppercase" }}>Party 2</th>
+              <th style={{ ...thStyle, textAlign: "left", width: "28%" }}></th>
+              <th style={{ ...thStyle, textAlign: "center" }}>Party 1</th>
+              <th style={{ ...thStyle, textAlign: "center" }}>Party 2</th>
             </tr>
           </thead>
           <tbody>
-            <SigRow label="Signature">
-              <div style={{ height: 36 }} />
-              <div style={{ height: 36 }} />
-            </SigRow>
-            <SigRow label="Print Name">
-              {field(v.party1Name, "Name")}
-              {field(v.party2Name, "Name")}
-            </SigRow>
-            <SigRow label="Title">
-              {field(v.party1Title, "Title")}
-              {field(v.party2Title, "Title")}
-            </SigRow>
-            <SigRow label="Company">
-              {field(v.party1Company, "Company")}
-              {field(v.party2Company, "Company")}
-            </SigRow>
-            <SigRow label="Notice Address">
-              {field(v.party1Address, "Email or address")}
-              {field(v.party2Address, "Email or address")}
-            </SigRow>
-            <SigRow label="Date">
-              <div style={{ height: 24 }} />
-              <div style={{ height: 24 }} />
-            </SigRow>
+            <SigRow label="Signature" cell1={<div style={{ height: 36 }} />} cell2={<div style={{ height: 36 }} />} />
+            <SigRow label="Print Name" cell1={field(v.party1Name, "Name")} cell2={field(v.party2Name, "Name")} />
+            <SigRow label="Title" cell1={field(v.party1Title, "Title")} cell2={field(v.party2Title, "Title")} />
+            <SigRow label="Company" cell1={field(v.party1Company, "Company")} cell2={field(v.party2Company, "Company")} />
+            <SigRow label="Notice Address" cell1={field(v.party1Address, "Email or address")} cell2={field(v.party2Address, "Email or address")} />
+            <SigRow label="Date" cell1={<div style={{ height: 24 }} />} cell2={<div style={{ height: 24 }} />} />
           </tbody>
         </table>
 
@@ -264,10 +259,10 @@ export function NdaPreview({ values: v }: Props) {
         </Clause>
 
         <Clause n={5} title="Term and Termination">
-          This MNDA commences on the <Ref>{formatDate(v.effectiveDate)}</Ref> and expires at the end of the{" "}
-          <Ref>{mndaTermText(v)}</Ref> Either party may terminate this MNDA for any or no reason upon written
+          This MNDA commences on the <Ref>{formatDate(v.effectiveDate)}</Ref> and continues for{" "}
+          <Ref>{mndaTermInline(v)}</Ref>. Either party may terminate this MNDA for any or no reason upon written
           notice to the other party. The Receiving Party&rsquo;s obligations relating to Confidential
-          Information will survive for the <Ref>{confTermText(v)}</Ref>, despite any expiration or termination
+          Information will survive for <Ref>{confTermInline(v)}</Ref>, despite any expiration or termination
           of this MNDA.
         </Clause>
 
@@ -342,6 +337,16 @@ export function NdaPreview({ values: v }: Props) {
   );
 }
 
+const thStyle: React.CSSProperties = {
+  border: "1px solid #d0cec8",
+  padding: "0.6rem 0.75rem",
+  fontWeight: 600,
+  fontFamily: "var(--font-ui)",
+  fontSize: "0.7rem",
+  letterSpacing: "0.05em",
+  textTransform: "uppercase",
+};
+
 function CoverRow({ label, sub, children }: { label: string; sub?: string; children: React.ReactNode }) {
   return (
     <tr style={{ borderBottom: "1px solid #e8e4da", verticalAlign: "top" }}>
@@ -366,8 +371,7 @@ function CoverRow({ label, sub, children }: { label: string; sub?: string; child
   );
 }
 
-function SigRow({ label, children }: { label: string; children: React.ReactNode }) {
-  const [c1, c2] = Array.isArray(children) ? children : [children, null];
+function SigRow({ label, cell1, cell2 }: { label: string; cell1: React.ReactNode; cell2: React.ReactNode }) {
   return (
     <tr style={{ borderBottom: "1px solid #d0cec8", verticalAlign: "top" }}>
       <td
@@ -383,8 +387,8 @@ function SigRow({ label, children }: { label: string; children: React.ReactNode 
       >
         {label}
       </td>
-      <td style={{ border: "1px solid #d0cec8", padding: "0.55rem 0.75rem", minHeight: 32 }}>{c1}</td>
-      <td style={{ border: "1px solid #d0cec8", padding: "0.55rem 0.75rem", minHeight: 32 }}>{c2}</td>
+      <td style={{ border: "1px solid #d0cec8", padding: "0.55rem 0.75rem", minHeight: 32 }}>{cell1}</td>
+      <td style={{ border: "1px solid #d0cec8", padding: "0.55rem 0.75rem", minHeight: 32 }}>{cell2}</td>
     </tr>
   );
 }
