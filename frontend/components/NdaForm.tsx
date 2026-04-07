@@ -16,7 +16,7 @@ export function NdaForm({ values, onChange }: Props) {
     <div style={{ display: "flex", flexDirection: "column", gap: "2.25rem" }}>
 
       {/* ── Purpose ── */}
-      <Section label="Purpose" hint="How Confidential Information may be used" delay={1}>
+      <Section label="Purpose" hint="How Confidential Information may be used">
         <textarea
           className="field-textarea"
           rows={3}
@@ -27,7 +27,7 @@ export function NdaForm({ values, onChange }: Props) {
       </Section>
 
       {/* ── Effective Date ── */}
-      <Section label="Effective Date" delay={2}>
+      <Section label="Effective Date">
         <input
           className="field-input"
           type="date"
@@ -37,7 +37,7 @@ export function NdaForm({ values, onChange }: Props) {
       </Section>
 
       {/* ── MNDA Term ── */}
-      <Section label="MNDA Term" hint="The length of this MNDA" delay={3}>
+      <Section label="MNDA Term" hint="The length of this MNDA">
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <label className="radio-pill">
             <input
@@ -73,7 +73,7 @@ export function NdaForm({ values, onChange }: Props) {
       </Section>
 
       {/* ── Term of Confidentiality ── */}
-      <Section label="Confidentiality Term" hint="How long information is protected" delay={4}>
+      <Section label="Confidentiality Term" hint="How long information is protected">
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <label className="radio-pill">
             <input
@@ -108,7 +108,7 @@ export function NdaForm({ values, onChange }: Props) {
       </Section>
 
       {/* ── Governing Law & Jurisdiction ── */}
-      <Section label="Governing Law" delay={5}>
+      <Section label="Governing Law">
         <FieldRow label="State">
           <input
             className="field-input"
@@ -128,7 +128,7 @@ export function NdaForm({ values, onChange }: Props) {
       </Section>
 
       {/* ── Party 1 ── */}
-      <Section label="Party 1" delay={6}>
+      <Section label="Party 1">
         {(
           [
             ["party1Name", "Print Name", "Jane Smith"],
@@ -149,7 +149,7 @@ export function NdaForm({ values, onChange }: Props) {
       </Section>
 
       {/* ── Party 2 ── */}
-      <Section label="Party 2" delay={7}>
+      <Section label="Party 2">
         {(
           [
             ["party2Name", "Print Name", "John Doe"],
@@ -176,16 +176,14 @@ export function NdaForm({ values, onChange }: Props) {
 function Section({
   label,
   hint,
-  delay,
   children,
 }: {
   label: string;
   hint?: string;
-  delay: number;
   children: React.ReactNode;
 }) {
   return (
-    <div className={`fade-up fade-up-${delay}`} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+    <div className="form-section fade-up" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       <div>
         <p className="form-section-label">{label}</p>
         {hint && (
