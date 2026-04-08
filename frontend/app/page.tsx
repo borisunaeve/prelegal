@@ -46,7 +46,7 @@ export default function Home() {
   if (!authChecked) return null;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)" }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "var(--background)" }}>
 
       {/* ── Header ── */}
       <header
@@ -151,11 +151,13 @@ export default function Home() {
             </p>
           </div>
 
-          <NdaChat
-            initialMessages={initialMessages}
-            values={values}
-            onChange={setValues}
-          />
+          <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <NdaChat
+              initialMessages={initialMessages}
+              values={values}
+              onChange={setValues}
+            />
+          </div>
         </aside>
 
         {/* Right: Document preview */}
