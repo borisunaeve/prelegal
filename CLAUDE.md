@@ -13,10 +13,11 @@ The current implementation has user auth, AI chat for the Mutual NDA, per-user c
 ## Development process
 
 When instructed to build a feature:
-1. Use your Atlassian tools to read the feature instructions from Jira
+1. Use your Atlassian tools to read the feature instructions from Jira and move the issue to **In Progress**
 2. Develop the feature - do not skip any step from the feature-dev 7 step process
 3. Thoroughly test the feature with unit tests and integration tests and fix any issues
-4. Submit a PR using your github tools
+4. Submit a PR using your github tools and move the issue to **In Review**
+5. Once the PR is merged / work is accepted, move the issue to **Done**
 
 ## AI design
 
