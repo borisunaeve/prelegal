@@ -31,6 +31,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Frontend lib is application code, not Python lib
+!frontend/lib/
+
 # PyTest
 .pytest_cache/
 .cache/
@@ -114,7 +117,6 @@ media/
 # ──────────────────────────────────────────────
 # Docker
 # ──────────────────────────────────────────────
-.dockerignore
 docker-compose.override.yml
 
 # ──────────────────────────────────────────────

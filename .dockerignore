@@ -1,0 +1,10 @@
+frontend/node_modules
+frontend/.next
+frontend/out
+backend/.venv
+backend/prelegal.db
+.env
+.git
+.claude
+**/__pycache__
+**/*.pyc
