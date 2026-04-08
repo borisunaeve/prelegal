@@ -3,12 +3,15 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+
 from .database import Base, engine
-from .routers import auth
+from .routers import auth, chat
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +39,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(chat.router)
 
 # Serve statically-built frontend (mounted last so API routes take precedence)
 static_dir = Path(__file__).parent.parent / "static"

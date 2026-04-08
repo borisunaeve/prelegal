@@ -273,6 +273,15 @@
   color: var(--background);
 }
 
+/* ── Typing indicator ────────────────────────────────────── */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot   { animation: typingBounce 1.2s ease-in-out infinite; }
+.typing-dot-1 { animation-delay: 0.2s; }
+.typing-dot-2 { animation-delay: 0.4s; }
+
 /* ── Print styles ────────────────────────────────────────── */
 @media print {
   .no-print { display: none !important; }

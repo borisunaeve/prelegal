@@ -6,3 +6,4 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY:-prelegal-dev-secret-change-in-production}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
