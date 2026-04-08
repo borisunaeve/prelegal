@@ -77,12 +77,12 @@ def select_document(
     doc = db.query(UserDocument).filter(UserDocument.user_id == user.id).first()
 
     if doc:
-        # Clear chat history for previous type if switching
-        if doc.document_type != body.document_type:
-            db.query(ChatMessage).filter(
-                ChatMessage.user_id == user.id,
-                ChatMessage.document_type == doc.document_type,
-            ).delete()
+        # Clear chat history for both the old and incoming types so the user
+        # always gets a fresh greeting — no stale messages from a prior session.
+        db.query(ChatMessage).filter(
+            ChatMessage.user_id == user.id,
+            ChatMessage.document_type.in_([doc.document_type, body.document_type]),
+        ).delete()
         doc.document_type = body.document_type
         doc.values_json = json.dumps(default_values_for(body.document_type))
     else:

@@ -13,9 +13,10 @@ The templates use:
 We convert markdown → HTML and style the link spans as gold-underlined references.
 """
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 
-TEMPLATES_DIR = Path(__file__).parent.parent.parent.parent / "templates"
+TEMPLATES_DIR = Path(__file__).parent.parent.parent / "templates"
 
 # Span classes that indicate defined-term references
 _LINK_CLASSES = {
@@ -49,26 +50,64 @@ _H3_STYLE = (
 )
 
 
+class _SpanRestyler(HTMLParser):
+    """Walk the HTML stream and restyle Common Paper <span> elements in-place.
+    Using a proper parser avoids the nested-span problem with regex."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self._buf: list[str] = []
+        self._span_stack: list[str] = []  # pending replacement styles
+
+    def handle_starttag(self, tag: str, attrs: list[tuple]) -> None:
+        if tag == "span":
+            cls = dict(attrs).get("class", "")
+            if cls in _LINK_CLASSES:
+                self._buf.append(f'<span style="{_LINK_STYLE}">')
+                self._span_stack.append("styled")
+            elif cls == "header_2":
+                self._buf.append(f'<span style="{_H2_STYLE}">')
+                self._span_stack.append("styled")
+            elif cls == "header_3":
+                self._buf.append(f'<span style="{_H3_STYLE}">')
+                self._span_stack.append("styled")
+            else:
+                # Unknown span — emit nothing; endtag will skip too
+                self._span_stack.append("skip")
+        else:
+            attr_str = "".join(
+                f' {k}="{v}"' if v is not None else f' {k}'
+                for k, v in attrs
+            )
+            self._buf.append(f"<{tag}{attr_str}>")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "span":
+            kind = self._span_stack.pop() if self._span_stack else "styled"
+            if kind == "styled":
+                self._buf.append("</span>")
+            # "skip" → emit nothing
+        else:
+            self._buf.append(f"</{tag}>")
+
+    def handle_data(self, data: str) -> None:
+        self._buf.append(data)
+
+    def handle_entityref(self, name: str) -> None:
+        self._buf.append(f"&{name};")
+
+    def handle_charref(self, name: str) -> None:
+        self._buf.append(f"&#{name};")
+
+    def result(self) -> str:
+        return "".join(self._buf)
+
+
 def _restyle_spans(html: str) -> str:
-    """Replace Common Paper span elements with styled equivalents."""
-
-    def replace_span(m: re.Match) -> str:
-        attrs = m.group(1)
-        inner = m.group(2)
-
-        # Detect class
-        cls_m = re.search(r'class="([^"]+)"', attrs)
-        cls = cls_m.group(1) if cls_m else ""
-
-        if cls in _LINK_CLASSES:
-            return f'<span style="{_LINK_STYLE}">{inner}</span>'
-        if cls == "header_2":
-            return f'<span style="{_H2_STYLE}">{inner}</span>'
-        if cls == "header_3":
-            return f'<span style="{_H3_STYLE}">{inner}</span>'
-        return inner  # strip unknown spans
-
-    return re.sub(r'<span([^>]*)>(.*?)</span>', replace_span, html, flags=re.DOTALL)
+    """Replace Common Paper span elements with styled equivalents using a proper HTML parser."""
+    parser = _SpanRestyler()
+    parser.feed(html)
+    return parser.result()
 
 
 def _md_to_html(md: str) -> str:

@@ -40,7 +40,8 @@ export function DocumentPicker({ onSelect }: Props) {
   async function handleSelect(key: string) {
     setSelecting(key);
     try {
-      await selectDocType(key);
+      const res = await selectDocType(key);
+      if (!res.ok) { setSelecting(null); return; }
       onSelect();
     } catch {
       setSelecting(null);
