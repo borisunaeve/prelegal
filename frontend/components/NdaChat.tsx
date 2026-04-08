@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { NdaForm } from "@/components/NdaForm";
+import { GenericDocForm } from "@/components/GenericDocForm";
 import type { NdaFormValues } from "@/lib/nda-types";
 import { getChatHistory, patchChatValues, resetChat, sendChatMessage } from "@/lib/api";
 
@@ -15,9 +16,10 @@ interface Props {
   initialMessages: ChatMessage[];
   values: NdaFormValues;
   onChange: (values: NdaFormValues) => void;
+  documentType?: string;
 }
 
-export function NdaChat({ initialMessages, values, onChange }: Props) {
+export function NdaChat({ initialMessages, values, onChange, documentType }: Props) {
   const [tab, setTab] = useState<"chat" | "edit">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -139,7 +141,14 @@ export function NdaChat({ initialMessages, values, onChange }: Props) {
       {tab === "edit" ? (
         /* ── Edit tab: manual form ── */
         <div style={{ overflowY: "auto", flex: 1 }}>
-          <NdaForm values={values} onChange={handleFormChange} />
+          {documentType === "Mutual-NDA" || documentType === "Mutual-NDA-coverpage" ? (
+            <NdaForm values={values} onChange={handleFormChange} />
+          ) : (
+            <GenericDocForm
+              values={values as unknown as Record<string, string>}
+              onChange={(v) => handleFormChange(v as unknown as NdaFormValues)}
+            />
+          )}
         </div>
       ) : (
         /* ── Chat tab ── */

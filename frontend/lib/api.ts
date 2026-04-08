@@ -52,3 +52,18 @@ export async function patchChatValues(values: Record<string, string>) {
     body: JSON.stringify({ values }),
   });
 }
+
+export async function getDocTypes() {
+  return apiFetch("/api/documents/types");
+}
+
+export async function selectDocType(document_type: string) {
+  return apiFetch("/api/documents/select", {
+    method: "POST",
+    body: JSON.stringify({ document_type }),
+  });
+}
+
+export async function renderDocument() {
+  return apiFetch("/api/documents/render");
+}

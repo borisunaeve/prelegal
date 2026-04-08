@@ -18,15 +18,18 @@ class ChatMessage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    document_type = Column(String, nullable=False, default="Mutual-NDA")
     role = Column(String, nullable=False)   # "user" | "assistant"
     content = Column(String, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
 
-class NdaDocument(Base):
-    __tablename__ = "nda_documents"
+class UserDocument(Base):
+    """One active document per user."""
+    __tablename__ = "user_documents"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    values_json = Column(String, nullable=False)   # JSON-serialised NdaFormValues
+    document_type = Column(String, nullable=False, default="Mutual-NDA")
+    values_json = Column(String, nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
