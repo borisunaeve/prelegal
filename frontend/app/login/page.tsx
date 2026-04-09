@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { login } from "@/lib/api";
+import { login, getMe } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +11,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    getMe().then((res) => {
+      if (res.ok) router.replace("/");
+      else setChecking(false);
+    }).catch(() => setChecking(false));
+  }, [router]);
+
+  if (checking) return null;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -89,12 +99,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <div>
               <label
+                htmlFor="email"
                 className="form-section-label"
                 style={{ marginBottom: "0.75rem", display: "block" }}
               >
                 Email
               </label>
               <input
+                id="email"
                 className="field-input"
                 type="email"
                 placeholder="you@company.com"
@@ -107,12 +119,14 @@ export default function LoginPage() {
 
             <div>
               <label
+                htmlFor="password"
                 className="form-section-label"
                 style={{ marginBottom: "0.75rem", display: "block" }}
               >
                 Password
               </label>
               <input
+                id="password"
                 className="field-input"
                 type="password"
                 placeholder="••••••••"

@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 from .database import Base, engine
-from .routers import auth, chat
+from .routers import auth, chat, documents
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(chat.router)
+app.include_router(documents.router)
 
 # Serve statically-built frontend (mounted last so API routes take precedence)
 static_dir = Path(__file__).parent.parent / "static"
