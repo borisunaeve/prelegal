@@ -48,6 +48,10 @@ class SelectDocIn(BaseModel):
     document_type: str
 
 
+class RenderIn(BaseModel):
+    values: Optional[dict] = None
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("/types", response_model=list[DocTypeOut])
@@ -97,12 +101,13 @@ def select_document(
     return {"document_type": body.document_type}
 
 
-@router.get("/render")
+@router.post("/render")
 def render_document(
+    body: RenderIn,
     user: User = Depends(_current_user),
     db: Session = Depends(get_db),
 ):
-    """Render the current document template with the user's field values."""
+    """Render the current document template with the provided or saved field values."""
     doc = db.query(UserDocument).filter(UserDocument.user_id == user.id).first()
     if not doc:
         raise HTTPException(status_code=400, detail="No document selected")
@@ -111,6 +116,6 @@ def render_document(
     if not cfg:
         raise HTTPException(status_code=400, detail="Unknown document type")
 
-    values = json.loads(doc.values_json)
+    values = body.values if body.values is not None else json.loads(doc.values_json)
     html = render_template(cfg["filename"], values)
     return JSONResponse({"html": html, "document_type": doc.document_type, "name": cfg["name"]})

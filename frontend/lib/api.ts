@@ -64,6 +64,9 @@ export async function selectDocType(document_type: string) {
   });
 }
 
-export async function renderDocument() {
-  return apiFetch("/api/documents/render");
+export async function renderDocument(values?: Record<string, string>) {
+  return apiFetch("/api/documents/render", {
+    method: "POST",
+    body: JSON.stringify({ values: values ?? null }),
+  });
 }
