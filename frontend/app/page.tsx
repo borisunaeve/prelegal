@@ -18,6 +18,7 @@ export default function Home() {
   const [userName, setUserName] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [docName, setDocName] = useState("");
+  const [hasProgress, setHasProgress] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -62,10 +63,41 @@ export default function Home() {
     }
   }
 
-  if (!authChecked) return null;
+  if (!authChecked) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--background)",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "2rem",
+            fontWeight: 300,
+            letterSpacing: "0.04em",
+            color: "var(--foreground-subtle)",
+          }}
+        >
+          Prelegal
+        </span>
+      </div>
+    );
+  }
 
   if (!documentType) {
-    return <DocumentPicker onSelect={handleDocumentSelected} />;
+    return (
+      <DocumentPicker
+        onSelect={handleDocumentSelected}
+        userName={userName}
+        onLogout={handleLogout}
+        hasProgress={hasProgress}
+      />
+    );
   }
 
   const isNda = documentType === "Mutual-NDA" || documentType === "Mutual-NDA-coverpage";
@@ -85,7 +117,7 @@ export default function Home() {
       >
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setDocumentType("")}
+            onClick={() => { setHasProgress(true); setDocumentType(""); }}
             style={{
               fontFamily: "var(--font-display)",
               fontSize: "1.6rem",

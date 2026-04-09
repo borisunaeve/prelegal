@@ -12,6 +12,7 @@ interface Props {
 export function GenericDocPreview({ values, documentType, docName }: Props) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -19,10 +20,14 @@ export function GenericDocPreview({ values, documentType, docName }: Props) {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setLoading(true);
-      renderDocument()
-        .then((res) => res.json())
+      setError("");
+      renderDocument(values)
+        .then((res) => {
+          if (!res.ok) throw new Error("render failed");
+          return res.json();
+        })
         .then((data) => setHtml(data.html ?? ""))
-        .catch(() => {})
+        .catch(() => setError("Could not render document. Please try again."))
         .finally(() => setLoading(false));
     }, 400);
 
@@ -98,10 +103,23 @@ export function GenericDocPreview({ values, documentType, docName }: Props) {
         </div>
       )}
 
-      <div
-        style={{ opacity: loading ? 0.3 : 1, transition: "opacity 0.2s" }}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      {error ? (
+        <div
+          style={{
+            padding: "1rem",
+            fontFamily: "var(--font-ui)",
+            fontSize: "0.8rem",
+            color: "var(--destructive)",
+          }}
+        >
+          {error}
+        </div>
+      ) : (
+        <div
+          style={{ opacity: loading ? 0.3 : 1, transition: "opacity 0.2s" }}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      )}
 
       <p
         style={{
