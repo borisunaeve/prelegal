@@ -4,16 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NdaChat, type ChatMessage } from "@/components/NdaChat";
 import { NdaPreview } from "@/components/NdaPreview";
+import { GenericDocPreview } from "@/components/GenericDocPreview";
+import { DocumentPicker } from "@/components/DocumentPicker";
 import { defaultValues } from "@/lib/nda-types";
 import type { NdaFormValues } from "@/lib/nda-types";
 import { getChatHistory, getMe, logout } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
-  const [values, setValues] = useState<NdaFormValues>(defaultValues);
+  const [values, setValues] = useState<Record<string, string>>(defaultValues as unknown as Record<string, string>);
   const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
   const [userName, setUserName] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [docName, setDocName] = useState("");
+  const [hasProgress, setHasProgress] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -27,8 +32,12 @@ export default function Home() {
         const historyRes = await getChatHistory();
         if (historyRes.ok) {
           const history = await historyRes.json();
-          setValues(history.values as NdaFormValues);
-          setInitialMessages(history.messages as ChatMessage[]);
+          if (history.document_type) {
+            setDocumentType(history.document_type);
+            setDocName(history.document_name ?? "");
+            setValues(history.values as Record<string, string>);
+            setInitialMessages(history.messages as ChatMessage[]);
+          }
         }
 
         setAuthChecked(true);
@@ -43,7 +52,56 @@ export default function Home() {
     router.replace("/login");
   }
 
-  if (!authChecked) return null;
+  async function handleDocumentSelected() {
+    const historyRes = await getChatHistory();
+    if (historyRes.ok) {
+      const history = await historyRes.json();
+      setDocumentType(history.document_type);
+      setDocName(history.document_name ?? "");
+      setValues(history.values as Record<string, string>);
+      setInitialMessages(history.messages as ChatMessage[]);
+    }
+  }
+
+  if (!authChecked) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--background)",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "2rem",
+            fontWeight: 300,
+            letterSpacing: "0.04em",
+            color: "var(--foreground-subtle)",
+          }}
+        >
+          Prelegal
+        </span>
+      </div>
+    );
+  }
+
+  if (!documentType) {
+    return (
+      <DocumentPicker
+        onSelect={handleDocumentSelected}
+        userName={userName}
+        onLogout={handleLogout}
+        hasProgress={hasProgress}
+      />
+    );
+  }
+
+  const isNda = documentType === "Mutual-NDA" || documentType === "Mutual-NDA-coverpage";
+  const displayName = docName || documentType.replace(/-/g, " ");
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "var(--background)" }}>
@@ -58,7 +116,8 @@ export default function Home() {
         }}
       >
         <div className="flex items-center gap-3">
-          <span
+          <button
+            onClick={() => { setHasProgress(true); setDocumentType(""); }}
             style={{
               fontFamily: "var(--font-display)",
               fontSize: "1.6rem",
@@ -66,10 +125,14 @@ export default function Home() {
               letterSpacing: "0.04em",
               color: "var(--foreground)",
               lineHeight: 1,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
             }}
           >
             Prelegal
-          </span>
+          </button>
           <span style={{ width: 1, height: 20, background: "var(--foreground-subtle)", display: "inline-block" }} />
           <span
             style={{
@@ -81,7 +144,7 @@ export default function Home() {
               color: "var(--foreground-muted)",
             }}
           >
-            Mutual NDA Creator
+            {displayName}
           </span>
         </div>
 
@@ -154,8 +217,9 @@ export default function Home() {
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <NdaChat
               initialMessages={initialMessages}
-              values={values}
-              onChange={setValues}
+              values={values as unknown as NdaFormValues}
+              onChange={(v) => setValues(v as unknown as Record<string, string>)}
+              documentType={documentType}
             />
           </div>
         </aside>
@@ -180,10 +244,18 @@ export default function Home() {
             className="paper-card mx-auto relative z-10 fade-up"
             style={{ maxWidth: 760, padding: "4rem 5rem", borderRadius: 4 }}
           >
-            <NdaPreview values={values} />
+            {isNda ? (
+              <NdaPreview values={values as unknown as NdaFormValues} />
+            ) : (
+              <GenericDocPreview
+                values={values}
+                documentType={documentType}
+                docName={displayName}
+              />
+            )}
           </div>
           <p
-            className="no-print text-center relative z-10 fade-up fade-up-3"
+            className="no-print text-center relative z-10 fade-up"
             style={{
               marginTop: "1.5rem",
               fontFamily: "var(--font-ui)",
@@ -192,7 +264,7 @@ export default function Home() {
               letterSpacing: "0.05em",
             }}
           >
-            Common Paper Mutual NDA Standard v1.0 · CC BY 4.0
+            Common Paper Standard · CC BY 4.0
           </p>
         </main>
       </div>

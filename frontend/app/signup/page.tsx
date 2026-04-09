@@ -1,20 +1,35 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signup } from "@/lib/api";
+import { signup, getMe } from "@/lib/api";
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    getMe().then((res) => {
+      if (res.ok) router.replace("/");
+      else setChecking(false);
+    }).catch(() => setChecking(false));
+  }, [router]);
+
+  if (checking) return null;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -90,12 +105,14 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <div>
               <label
+                htmlFor="name"
                 className="form-section-label"
                 style={{ marginBottom: "0.75rem", display: "block" }}
               >
                 Full Name
               </label>
               <input
+                id="name"
                 className="field-input"
                 type="text"
                 placeholder="Jane Smith"
@@ -108,12 +125,14 @@ export default function SignupPage() {
 
             <div>
               <label
+                htmlFor="email"
                 className="form-section-label"
                 style={{ marginBottom: "0.75rem", display: "block" }}
               >
                 Email
               </label>
               <input
+                id="email"
                 className="field-input"
                 type="email"
                 placeholder="you@company.com"
@@ -126,17 +145,40 @@ export default function SignupPage() {
 
             <div>
               <label
+                htmlFor="password"
                 className="form-section-label"
                 style={{ marginBottom: "0.75rem", display: "block" }}
               >
                 Password
               </label>
               <input
+                id="password"
                 className="field-input"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirm-password"
+                className="form-section-label"
+                style={{ marginBottom: "0.75rem", display: "block" }}
+              >
+                Confirm Password
+              </label>
+              <input
+                id="confirm-password"
+                className="field-input"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={8}
                 autoComplete="new-password"

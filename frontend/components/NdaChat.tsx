@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { NdaForm } from "@/components/NdaForm";
+import { GenericDocForm } from "@/components/GenericDocForm";
 import type { NdaFormValues } from "@/lib/nda-types";
 import { getChatHistory, patchChatValues, resetChat, sendChatMessage } from "@/lib/api";
 
@@ -15,18 +16,27 @@ interface Props {
   initialMessages: ChatMessage[];
   values: NdaFormValues;
   onChange: (values: NdaFormValues) => void;
+  documentType?: string;
 }
 
-export function NdaChat({ initialMessages, values, onChange }: Props) {
+export function NdaChat({ initialMessages, values, onChange, documentType }: Props) {
   const [tab, setTab] = useState<"chat" | "edit">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetConfirming, setResetConfirming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
 
   async function handleSend(e: FormEvent) {
     e.preventDefault();
@@ -67,6 +77,17 @@ export function NdaChat({ initialMessages, values, onChange }: Props) {
       const data = await res.json();
       setMessages(data.messages);
       onChange(data.values as NdaFormValues);
+    }
+  }
+
+  function handleResetClick() {
+    if (resetConfirming) {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      setResetConfirming(false);
+      handleReset();
+    } else {
+      setResetConfirming(true);
+      resetTimerRef.current = setTimeout(() => setResetConfirming(false), 3000);
     }
   }
 
@@ -115,12 +136,12 @@ export function NdaChat({ initialMessages, values, onChange }: Props) {
           ))}
         </div>
         <button
-          onClick={handleReset}
-          title="Start over"
+          onClick={handleResetClick}
+          title={resetConfirming ? "Click again to confirm reset" : "Start over"}
           style={{
             background: "none",
             border: "none",
-            color: "var(--foreground-subtle)",
+            color: resetConfirming ? "var(--destructive)" : "var(--foreground-subtle)",
             fontFamily: "var(--font-ui)",
             fontSize: "0.65rem",
             letterSpacing: "0.08em",
@@ -129,17 +150,22 @@ export function NdaChat({ initialMessages, values, onChange }: Props) {
             padding: "0.35rem 0",
             transition: "color 0.15s ease",
           }}
-          onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "var(--foreground-muted)")}
-          onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "var(--foreground-subtle)")}
         >
-          Reset
+          {resetConfirming ? "Confirm?" : "Reset"}
         </button>
       </div>
 
       {tab === "edit" ? (
         /* ── Edit tab: manual form ── */
         <div style={{ overflowY: "auto", flex: 1 }}>
-          <NdaForm values={values} onChange={handleFormChange} />
+          {documentType === "Mutual-NDA" || documentType === "Mutual-NDA-coverpage" ? (
+            <NdaForm values={values} onChange={handleFormChange} />
+          ) : (
+            <GenericDocForm
+              values={values as unknown as Record<string, string>}
+              onChange={(v) => handleFormChange(v as unknown as NdaFormValues)}
+            />
+          )}
         </div>
       ) : (
         /* ── Chat tab ── */
