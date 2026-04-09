@@ -1,13 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { NdaForm } from "@/components/NdaForm";
 import { NdaPreview } from "@/components/NdaPreview";
 import { defaultValues } from "@/lib/nda-types";
 import type { NdaFormValues } from "@/lib/nda-types";
+import { getMe, logout } from "@/lib/api";
 
 export default function Home() {
+  const router = useRouter();
   const [values, setValues] = useState<NdaFormValues>(defaultValues);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getMe();
+        if (res.ok) {
+          const user = await res.json();
+          setUserName(user.name);
+          setAuthChecked(true);
+        } else {
+          router.replace("/login");
+        }
+      } catch {
+        router.replace("/login");
+      }
+    })();
+  }, [router]);
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+  }
+
+  if (!authChecked) return null;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)" }}>
@@ -57,14 +86,44 @@ export default function Home() {
           </span>
         </div>
 
-        <button className="btn-gold" onClick={() => window.print()}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Download PDF
-        </button>
+        <div className="flex items-center gap-4">
+          {userName && (
+            <span
+              style={{
+                fontFamily: "var(--font-ui)",
+                fontSize: "0.75rem",
+                color: "var(--foreground-muted)",
+              }}
+            >
+              {userName}
+            </span>
+          )}
+          <button className="btn-gold" onClick={() => window.print()}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download PDF
+          </button>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "none",
+              border: "none",
+              fontFamily: "var(--font-ui)",
+              fontSize: "0.7rem",
+              fontWeight: 500,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--foreground-muted)",
+              cursor: "pointer",
+              padding: "0.5rem 0",
+            }}
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       {/* ── Body ── */}

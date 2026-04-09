@@ -22,9 +22,8 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Mutual NDA Creator | Prelegal",
-  description:
-    "Create and download a Mutual Non-Disclosure Agreement powered by Common Paper Standard v1.0",
+  title: "Prelegal — Legal Agreements",
+  description: "Draft and download legal agreements powered by Common Paper standards",
 };
 
 export default function RootLayout({
