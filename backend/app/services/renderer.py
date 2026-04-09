@@ -19,7 +19,7 @@ import re
 from html.parser import HTMLParser
 from pathlib import Path
 
-TEMPLATES_DIR = Path(__file__).parent.parent.parent / "templates"
+TEMPLATES_DIR = Path(__file__).parent.parent.parent.parent / "templates"
 
 # Span classes that indicate defined-term references (should be substituted)
 _LINK_CLASSES = {
