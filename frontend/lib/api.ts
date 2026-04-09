@@ -30,3 +30,25 @@ export async function signup(name: string, email: string, password: string) {
 export async function logout() {
   return apiFetch("/api/auth/logout", { method: "POST" });
 }
+
+export async function getChatHistory() {
+  return apiFetch("/api/chat/history");
+}
+
+export async function sendChatMessage(content: string) {
+  return apiFetch("/api/chat/message", {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export async function resetChat() {
+  return apiFetch("/api/chat/reset", { method: "POST" });
+}
+
+export async function patchChatValues(values: Record<string, string>) {
+  return apiFetch("/api/chat/values", {
+    method: "PATCH",
+    body: JSON.stringify({ values }),
+  });
+}

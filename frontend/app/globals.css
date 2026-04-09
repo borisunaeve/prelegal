@@ -273,20 +273,49 @@
   color: var(--background);
 }
 
+/* ── Typing indicator ────────────────────────────────────── */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot   { animation: typingBounce 1.2s ease-in-out infinite; }
+.typing-dot-1 { animation-delay: 0.2s; }
+.typing-dot-2 { animation-delay: 0.4s; }
+
 /* ── Print styles ────────────────────────────────────────── */
 @media print {
+  /* Reset all viewport/overflow constraints so full document prints */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  /* Collapse every ancestor that could clip content */
+  body > * {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .no-print { display: none !important; }
+
   .print-full {
+    display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    overflow: visible !important;
     height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: white !important;
   }
+
   body { background: white !important; }
+
   .paper-card {
     box-shadow: none !important;
     border: none !important;
+    max-width: 100% !important;
+    padding: 2cm 2.5cm !important;
   }
+
   .nda-document {
     font-size: 11pt;
     line-height: 1.65;
